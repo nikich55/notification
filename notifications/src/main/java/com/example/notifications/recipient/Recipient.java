@@ -17,7 +17,6 @@ public class Recipient {
     private String email;
 
     @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL)
-    @JsonIgnore // Ignore the notifications list when serializing Recipient
     private List<Notification> notifications;
 
     public Recipient() {}

@@ -19,7 +19,6 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "recipient_id")
-    @JsonManagedReference // Prevent circular reference by serializing the recipient only
     private Recipient recipient;
 
     public Notification() {
