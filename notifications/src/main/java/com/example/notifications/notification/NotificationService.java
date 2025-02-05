@@ -1,10 +1,8 @@
 package com.example.notifications.notification;
 
-import com.example.notifications.notification.Notification;
-import com.example.notifications.recipient.Recipient;
-import com.example.notifications.notification.enums.NotificationStatus;
 import com.example.notifications.notification.sendnotification.SendNotification;
-import com.example.notifications.notification.NotificationRepository;
+import com.example.notifications.notification_status.NotificationStatusService;
+import com.example.notifications.recipient.Recipient;
 import com.example.notifications.recipient.RecipientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,13 +18,16 @@ public class NotificationService {
 
     private final RecipientRepository recipientRepository;
 
+    private final NotificationStatusService notificationStatusService;
+
     @Autowired
     //@Qualifier("sendMessengerNotification")
     public NotificationService(SendNotification sendNotification, NotificationRepository notificationRepository,
-                               RecipientRepository recipientRepository) {
+                               RecipientRepository recipientRepository, NotificationStatusService notificationStatusService) {
         this.sendNotification = sendNotification;
         this.notificationRepository = notificationRepository;
         this.recipientRepository = recipientRepository;
+        this.notificationStatusService = notificationStatusService;
     }
 
     public List<NotificationDTO> getNotifications() {
@@ -37,11 +38,8 @@ public class NotificationService {
         return convertToDTOList(notificationRepository.findByRecipientId(recipientId));
     }
 
-    public List<NotificationDTO> findRecipientByIdAndStatus(Long recipientId) {
-        if (!recipientRepository.existsById(recipientId)) {
-            throw new IllegalStateException("Recipient with id " + recipientId + " not found");
-        }
-        return convertToDTOList(notificationRepository.findByRecipientIdAndStatus(recipientId, NotificationStatus.UNREAD));
+    public List<NotificationDTO> getUnreadNotifications(Long recipientId) {
+        return convertToDTOList(notificationRepository.findByRecipientIdAndStatus(recipientId, notificationStatusService.getUnreadStatus()));
     }
 
     public NotificationDTO sendNotificationToRecipient(String message, Long recipientId) {
@@ -56,11 +54,14 @@ public class NotificationService {
     }
     private Notification createNotification(String message, Recipient recipient) {
         Notification notification = new Notification();
+
         notification.setMessage(message);
         notification.setRecipient(recipient);
-        notification.setStatus(NotificationStatus.UNREAD);
+        notification.setStatus(notificationStatusService.getUnreadStatus());
+
         return notification;
     }
+
     public void deleteNotification(Long id) {
         boolean exists = notificationRepository.existsById(id);
         if (!exists) {

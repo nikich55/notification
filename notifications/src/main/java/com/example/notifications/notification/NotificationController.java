@@ -29,7 +29,7 @@ public class NotificationController {
     // Unread notifications by id
     @GetMapping("/recipient/{recipientId}/unread")
     public List<NotificationDTO> getUnreadNotifications(@PathVariable Long recipientId) {
-        return notificationService.findRecipientByIdAndStatus(recipientId);
+        return notificationService.getUnreadNotifications(recipientId);
     }
 
     // Send notification to recipient by id

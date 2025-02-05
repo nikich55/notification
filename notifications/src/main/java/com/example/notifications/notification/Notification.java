@@ -1,6 +1,6 @@
 package com.example.notifications.notification;
 
-import com.example.notifications.notification.enums.NotificationStatus;
+import com.example.notifications.notification_status.NotificationStatus;
 import com.example.notifications.recipient.Recipient;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -14,8 +14,9 @@ public class Notification {
 
     private String message;
 
-    @Enumerated(EnumType.STRING)
-    private NotificationStatus status = NotificationStatus.UNREAD;
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private NotificationStatus status;
 
     @ManyToOne
     @JoinColumn(name = "recipient_id")
