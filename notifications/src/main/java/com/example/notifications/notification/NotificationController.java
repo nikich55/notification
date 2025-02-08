@@ -8,7 +8,8 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "api/notification")
 public class NotificationController {
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
+
     @Autowired
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
@@ -16,26 +17,26 @@ public class NotificationController {
 
     // All notifications
     @GetMapping
-    public List<NotificationDTO> getNotification() {
+    public List<NotificationRecordDTO> getNotification() {
         return notificationService.getNotifications();
     }
 
-   // Notifications by recipientId
+    // Notifications by recipientId
     @GetMapping("/recipient/{recipientId}")
-    public List<NotificationDTO> getNotificationsByRecipient(@PathVariable Long recipientId) {
+    public List<NotificationRecordDTO> getNotificationsByRecipient(@PathVariable Long recipientId) {
         return notificationService.findRecipientById(recipientId);
     }
 
     // Unread notifications by id
     @GetMapping("/recipient/{recipientId}/unread")
-    public List<NotificationDTO> getUnreadNotifications(@PathVariable Long recipientId) {
+    public List<NotificationRecordDTO> getUnreadNotifications(@PathVariable Long recipientId) {
         return notificationService.getUnreadNotifications(recipientId);
     }
 
     // Send notification to recipient by id
     @PostMapping("/send/{recipientId}")
-    public NotificationDTO sendNotificationToRecipient(@PathVariable Long recipientId, @RequestBody String message) {
-       return notificationService.sendNotificationToRecipient(message, recipientId);
+    public NotificationRecordDTO sendNotificationToRecipient(@PathVariable Long recipientId, @RequestBody NotificationsRequest request) {
+        return notificationService.sendNotificationToRecipient(request.message(), recipientId);
     }
 
     // Delete recipient by id

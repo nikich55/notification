@@ -1,9 +1,9 @@
 package com.example.notifications.notification;
 
 import com.example.notifications.notification.sendnotification.SendNotification;
-import com.example.notifications.notification_status.NotificationStatusService;
+import com.example.notifications.notification.status.NotificationStatusService;
 import com.example.notifications.recipient.Recipient;
-import com.example.notifications.recipient.RecipientRepository;
+import com.example.notifications.recipient.RecipientRepoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,45 +13,47 @@ import java.util.List;
 public class NotificationService {
 
     private final SendNotification sendNotification;
-
-    private final NotificationRepository notificationRepository;
-
-    private final RecipientRepository recipientRepository;
-
+    private final NotificationRepoService notificationRepoService;
+    private final RecipientRepoService recipientRepoService;
     private final NotificationStatusService notificationStatusService;
+    private final NotificationMapper notificationMapper;
+
 
     @Autowired
     //@Qualifier("sendMessengerNotification")
-    public NotificationService(SendNotification sendNotification, NotificationRepository notificationRepository,
-                               RecipientRepository recipientRepository, NotificationStatusService notificationStatusService) {
+    public NotificationService(SendNotification sendNotification, NotificationRepoService notificationRepoService,
+                               RecipientRepoService recipientRepoService, NotificationStatusService notificationStatusService,
+                               NotificationMapper notificationMapper) {
         this.sendNotification = sendNotification;
-        this.notificationRepository = notificationRepository;
-        this.recipientRepository = recipientRepository;
+        this.notificationRepoService = notificationRepoService;
+        this.recipientRepoService = recipientRepoService;
         this.notificationStatusService = notificationStatusService;
+        this.notificationMapper = notificationMapper;
     }
 
-    public List<NotificationDTO> getNotifications() {
-        return convertToDTOList(notificationRepository.findAll());
+    public List<NotificationRecordDTO> getNotifications() {
+        return convertToDTOList(notificationRepoService.findAll());
     }
 
-    public List<NotificationDTO> findRecipientById(Long recipientId) {
-        return convertToDTOList(notificationRepository.findByRecipientId(recipientId));
+    public List<NotificationRecordDTO> findRecipientById(Long recipientId) {
+        return convertToDTOList(notificationRepoService.findByRecipientId(recipientId));
     }
 
-    public List<NotificationDTO> getUnreadNotifications(Long recipientId) {
-        return convertToDTOList(notificationRepository.findByRecipientIdAndStatus(recipientId, notificationStatusService.getUnreadStatus()));
+    public List<NotificationRecordDTO> getUnreadNotifications(Long recipientId) {
+        return convertToDTOList(notificationRepoService.findByRecipientIdAndStatus(recipientId, notificationStatusService.getUnreadStatus()));
     }
 
-    public NotificationDTO sendNotificationToRecipient(String message, Long recipientId) {
-        Recipient recipient = recipientRepository.findById(recipientId)
+    public NotificationRecordDTO sendNotificationToRecipient(String message, Long recipientId) {
+        Recipient recipient = recipientRepoService.findById(recipientId)
                 .orElseThrow(() -> new IllegalStateException("Recipient not found"));
 
         Notification notification = createNotification(message, recipient);
         sendNotification.sendNotification(message);
-        Notification savedNotification = notificationRepository.save(notification);
+        Notification savedNotification = notificationRepoService.save(notification);
 
-        return new NotificationDTO(savedNotification);
+        return notificationMapper.toDto(savedNotification);
     }
+
     private Notification createNotification(String message, Recipient recipient) {
         Notification notification = new Notification();
 
@@ -63,16 +65,16 @@ public class NotificationService {
     }
 
     public void deleteNotification(Long id) {
-        boolean exists = notificationRepository.existsById(id);
+        boolean exists = notificationRepoService.existsById(id);
         if (!exists) {
             throw new IllegalStateException("notification does not exist");
         }
-        notificationRepository.deleteById(id);
+        notificationRepoService.deleteById(id);
     }
 
-    private List<NotificationDTO> convertToDTOList(List<Notification> notifications) {
+    private List<NotificationRecordDTO> convertToDTOList(List<Notification> notifications) {
         return notifications.stream()
-                .map(NotificationDTO::new)
+                .map(notificationMapper::toDto)
                 .toList();
     }
 }

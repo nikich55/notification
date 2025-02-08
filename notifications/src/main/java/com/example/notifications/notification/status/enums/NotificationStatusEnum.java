@@ -1,4 +1,4 @@
-package com.example.notifications.notification_status.enums;
+package com.example.notifications.notification.status.enums;
 
 public enum NotificationStatusEnum {
     FAILED,

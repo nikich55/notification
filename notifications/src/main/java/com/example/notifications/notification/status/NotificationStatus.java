@@ -1,5 +1,6 @@
-package com.example.notifications.notification_status;
-import com.example.notifications.notification_status.enums.NotificationStatusEnum;
+package com.example.notifications.notification.status;
+
+import com.example.notifications.notification.status.enums.NotificationStatusEnum;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,12 +13,6 @@ public class NotificationStatus {
 
     @Enumerated(EnumType.STRING)
     private NotificationStatusEnum status;   // READ, UNREAD, SENT, FAILED
-
-    public NotificationStatus() {}
-
-    public NotificationStatus(NotificationStatusEnum status) {
-        this.status = status;
-    }
 
     public Long getId() {
         return id;
